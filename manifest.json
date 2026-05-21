@@ -1,0 +1,39 @@
+{
+  "manifest_version": "0.3",
+  "name": "lawmatics-pp-mcp",
+  "display_name": "Lawmatics",
+  "version": "4.9.0",
+  "description": "Lawmatics API surface as MCP tools.",
+  "author": {
+    "name": "CLI Printing Press"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "bin/lawmatics-pp-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/bin/lawmatics-pp-mcp",
+      "args": [],
+      "env": {
+        "LAWMATICS_ACCESS_TOKEN": "${user_config.lawmatics_access_token}"
+      }
+    }
+  },
+  "user_config": {
+    "lawmatics_access_token": {
+      "type": "string",
+      "title": "LAWMATICS_ACCESS_TOKEN",
+      "description": "Sets LAWMATICS_ACCESS_TOKEN for the Lawmatics MCP server.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
+  }
+}

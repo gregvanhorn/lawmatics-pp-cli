@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-21T03:18:52.74421Z",
+  "printing_press_version": "4.9.0",
+  "api_name": "lawmatics",
+  "display_name": "Lawmatics",
+  "cli_name": "lawmatics-pp-cli",
+  "owner": "gregvanhorn",
+  "printer": "gregvanhorn",
+  "printer_name": "Greg Van Horn",
+  "run_id": "20260520-223821",
+  "mcp_binary": "lawmatics-pp-mcp",
+  "mcp_tool_count": 152,
+  "mcp_ready": "full",
+  "api_version": "1.0.0",
+  "auth_type": "oauth2",
+  "auth_env_vars": [
+    "LAWMATICS_ACCESS_TOKEN"
+  ],
+  "novel_features": [
+    {
+      "name": "Local SQLite mirror + FTS5",
+      "command": "search",
+      "description": "Sub-100ms offline full-text search across contacts, matters, notes, comments, and interactions including custom fields."
+    },
+    {
+      "name": "Stage bottleneck",
+      "command": "bottleneck",
+      "description": "Median matter dwell-time per intake/pipeline stage, surfacing where deals get stuck."
+    },
+    {
+      "name": "Cross-matter overdue",
+      "command": "overdue",
+      "description": "Every past-due task across every matter, grouped by assignee and sorted by lateness."
+    },
+    {
+      "name": "Since-window change feed",
+      "command": "since",
+      "description": "Everything created or updated in the last N hours/days across all entities."
+    },
+    {
+      "name": "Custom-field report",
+      "command": "cf report",
+      "description": "Join contacts and matters with arbitrary custom fields and pivot to CSV/JSON."
+    },
+    {
+      "name": "Bulk reassign",
+      "command": "bulk reassign",
+      "description": "Reassign every task matching a filter from one user to another in one command."
+    },
+    {
+      "name": "Source velocity",
+      "command": "velocity",
+      "description": "Rolling conversion rate (prospect to signed matter) per referral source with sparklines."
+    },
+    {
+      "name": "Stale intake",
+      "command": "intake stale",
+      "description": "Prospects with zero interactions in N days."
+    },
+    {
+      "name": "Who-touched",
+      "command": "who-touched",
+      "description": "Unified chronological feed of every interaction, note, task, and email across all matters for a contact."
+    },
+    {
+      "name": "Revenue by source",
+      "command": "revenue",
+      "description": "Sums invoiced and paid amounts per referral source or practice area."
+    },
+    {
+      "name": "Attorney load",
+      "command": "load",
+      "description": "Open matters, overdue tasks, and billable hours MTD per attorney."
+    },
+    {
+      "name": "Doctor",
+      "command": "doctor",
+      "description": "Health check: orphan tasks, contacts with no email, matters in dead stages, custom fields never used, dormant users."
+    },
+    {
+      "name": "Webhook bridge",
+      "command": "watch",
+      "description": "Local daemon that polls and POSTs entity diffs to a URL of your choice."
+    },
+    {
+      "name": "Matter explain",
+      "command": "explain",
+      "description": "Markdown brief summarizing a matter from notes, interactions, and tasks."
+    },
+    {
+      "name": "Pipeline drift",
+      "command": "pipeline drift",
+      "description": "Matters that skipped a stage or moved backward through the pipeline."
+    }
+  ]
+}

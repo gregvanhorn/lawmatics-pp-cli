@@ -1,0 +1,40 @@
+# Compiled binaries
+/lawmatics-pp-cli
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build artifacts
+/build/
+/dist/
+
+# Test binaries / coverage
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Local state from printing-press
+.printing-press-pii-polish.json
+.manuscripts/
+dogfood-results.json
+workflow-verify-report.json
+
+# Local SQLite store (created by sync command)
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets / env files
+.env
+.env.*
+*.token
+*.pem
+*.key
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

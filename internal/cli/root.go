@@ -296,6 +296,7 @@ See README.md or the bundled SKILL.md for recipes.`,
 	rootCmd.AddCommand(newAnalyticsCmd(flags))
 	rootCmd.AddCommand(newWorkflowCmd(flags))
 	rootCmd.AddCommand(newAPICmd(flags))
+	rootCmd.AddCommand(newFormsCmd(flags))
 	rootCmd.AddCommand(newLocationsPromotedCmd(flags))
 	rootCmd.AddCommand(newVersionCliCmd())
 

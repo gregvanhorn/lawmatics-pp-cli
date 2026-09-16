@@ -24,6 +24,7 @@
         "internal/cli/forms_fields.go",
         "internal/cli/forms_entries.go",
         "internal/cli/forms_submit.go",
+        "internal/cli/root.go",
         "internal/cli/which.go",
         "README.md",
         "SKILL.md"
@@ -31,15 +32,10 @@
       "validated_outcome": "Form 450 (797 rows) flattens to its fillable components in form order, deduplicated; `forms submit --json-file` posts a body keyed by component id."
     },
     {
-      "id": "campaigns-sources-interfaces",
-      "summary": "Add read-only `campaigns` and `sources` interfaces, and let a visible command group opt into the `api` index with pp:interface.",
-      "reason": "Both endpoints are live but missing from the generated tree; the annotation keeps `api` an accurate audit of the endpoint surface now that one interface is also a top-level command.",
-      "files": [
-        "internal/cli/campaigns.go",
-        "internal/cli/simple_resource.go",
-        "internal/cli/api_discovery.go",
-        "internal/cli/root.go"
-      ]
+      "id": "api-index-visible-interfaces",
+      "summary": "Let a visible command group opt into the `api` index with a pp:interface annotation.",
+      "reason": "The index equated 'interface' with 'hidden', which would have omitted the forms group from the endpoint surface an agent audits with `api`.",
+      "files": ["internal/cli/api_discovery.go"]
     },
     {
       "id": "client-raw-post",

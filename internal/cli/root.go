@@ -249,7 +249,6 @@ See README.md or the bundled SKILL.md for recipes.`,
 		return nil
 	}
 	rootCmd.AddCommand(newAddressesCmd(flags))
-	rootCmd.AddCommand(newCampaignsCmd(flags))
 	rootCmd.AddCommand(newCommentsCmd(flags))
 	rootCmd.AddCommand(newCompaniesCmd(flags))
 	rootCmd.AddCommand(newContactsCmd(flags))
@@ -273,7 +272,6 @@ See README.md or the bundled SKILL.md for recipes.`,
 	rootCmd.AddCommand(newProspectsCmd(flags))
 	rootCmd.AddCommand(newRelationshipTypesCmd(flags))
 	rootCmd.AddCommand(newRelationshipsCmd(flags))
-	rootCmd.AddCommand(newSourcesCmd(flags))
 	rootCmd.AddCommand(newStagesCmd(flags))
 	rootCmd.AddCommand(newSubtasksCmd(flags))
 	rootCmd.AddCommand(newTagsCmd(flags))

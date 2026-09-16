@@ -250,5 +250,31 @@ func formPath(formID string, suffix ...string) string {
 // table for humans at a terminal.
 func printFormsPayload(cmd *cobra.Command, flags *rootFlags, data json.RawMessage) error {
 	prov := attachFreshness(DataProvenance{Source: "live", ResourceType: "forms"}, flags)
-	return printResourcePayload(cmd, flags, data, prov)
+	if wantsHumanTable(cmd.OutOrStdout(), flags) {
+		var countItems []json.RawMessage
+		if json.Unmarshal(data, &countItems) != nil {
+			countItems = []json.RawMessage{data}
+		}
+		printProvenance(cmd, len(countItems), prov)
+	}
+	if flags.asJSON || (!isTerminal(cmd.OutOrStdout()) && !flags.csv && !flags.quiet && !flags.plain) {
+		filtered := data
+		if flags.selectFields != "" {
+			filtered = filterFields(filtered, flags.selectFields)
+		} else if flags.compact {
+			filtered = compactFields(filtered)
+		}
+		wrapped, err := wrapWithProvenance(filtered, prov)
+		if err != nil {
+			return err
+		}
+		return printOutput(cmd.OutOrStdout(), wrapped, true)
+	}
+	if wantsHumanTable(cmd.OutOrStdout(), flags) {
+		var items []map[string]any
+		if json.Unmarshal(data, &items) == nil && len(items) > 0 {
+			return printAutoTable(cmd.OutOrStdout(), items)
+		}
+	}
+	return printOutputWithFlags(cmd.OutOrStdout(), data, flags)
 }

@@ -249,11 +249,14 @@ so the next reader does not re-derive them:
 | Resource | Status |
 | --- | --- |
 | `/v1/forms` | Live. Covered by the `forms` command group added for this reason. |
-| `/v1/campaigns` | Live. Covered by `campaigns list` / `campaigns get`. |
-| `/v1/sources` | Live. Covered by `sources list` / `sources get`. |
+| `/v1/campaigns` | Live; **not covered**. No interface in this CLI yet. |
+| `/v1/sources` | Live; **not covered**. No interface in this CLI yet. |
 | `/v1/collections`, `/v1/collection_items` | Documented by Lawmatics; **not covered** by this CLI. |
 | `POST /v1/forms` | Returns 404 — form definitions are UI-only. |
 | documents, document_templates, signatures, automations, webhooks, bookings, SMS, landing_pages, reports, email_templates | 404 on the audited account; no public REST surface to mirror. |
+
+Campaigns and sources are live and small enough to mirror; they are listed
+here rather than implemented so this change stays scoped to forms.
 
 Known behaviour gaps in the resources this CLI already covers:
 
@@ -394,13 +397,6 @@ Operations on addresses
 - **`lawmatics-pp-cli addresses get`** - Get an address
 - **`lawmatics-pp-cli addresses list`** - List addresses
 - **`lawmatics-pp-cli addresses update`** - Update an address
-
-### campaigns
-
-Operations on campaigns
-
-- **`lawmatics-pp-cli campaigns get`** - Get a campaign
-- **`lawmatics-pp-cli campaigns list`** - List campaigns
 
 ### comments
 
@@ -643,13 +639,6 @@ Operations on relationships
 - **`lawmatics-pp-cli relationships get`** - Get a relationship
 - **`lawmatics-pp-cli relationships list`** - List relationships
 - **`lawmatics-pp-cli relationships update`** - Update a relationship
-
-### sources
-
-Operations on sources
-
-- **`lawmatics-pp-cli sources get`** - Get a source
-- **`lawmatics-pp-cli sources list`** - List sources
 
 ### stages
 

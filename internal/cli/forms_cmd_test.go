@@ -360,10 +360,11 @@ func TestAPIIndexIncludesForms(t *testing.T) {
 	for _, iface := range index.Interfaces {
 		found[iface.Name] = true
 	}
-	for _, want := range []string{"forms", "campaigns", "sources"} {
-		if !found[want] {
-			t.Errorf("api index is missing %q", want)
-		}
+	if !found["forms"] {
+		t.Errorf("api index is missing forms: %s", out)
+	}
+	if !found["contacts"] {
+		t.Errorf("api index lost the generated interfaces: %s", out)
 	}
 
 	out, err = runForms(t, "api", "forms", "--json")

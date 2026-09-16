@@ -177,11 +177,6 @@ These capabilities aren't available in any other tool for this API.
 - `lawmatics-pp-cli addresses list` — List addresses
 - `lawmatics-pp-cli addresses update` — Update an address
 
-**campaigns** — Operations on campaigns
-
-- `lawmatics-pp-cli campaigns get` — Get a campaign
-- `lawmatics-pp-cli campaigns list` — List campaigns
-
 **comments** — Operations on comments
 
 - `lawmatics-pp-cli comments create` — Create a comment
@@ -374,11 +369,6 @@ These capabilities aren't available in any other tool for this API.
 - `lawmatics-pp-cli relationships list` — List relationships
 - `lawmatics-pp-cli relationships update` — Update a relationship
 
-**sources** — Operations on sources
-
-- `lawmatics-pp-cli sources get` — Get a source
-- `lawmatics-pp-cli sources list` — List sources
-
 **stages** — Operations on stages
 
 - `lawmatics-pp-cli stages get` — Get a stage
@@ -453,7 +443,9 @@ lawmatics-pp-cli which "<capability in your own words>"
 
 From a 2026-09-16 audit of the live API against this CLI:
 
-- **Not covered by any command:** `/v1/collections` and `/v1/collection_items`.
+- **Live but not covered by any command:** `/v1/campaigns`, `/v1/sources`,
+  `/v1/collections`, and `/v1/collection_items`. There is no raw-request
+  command, so these need a direct HTTP call until an interface exists.
 - **No API surface at all** (404 on the audited account): documents,
   document_templates, signatures, automations, webhooks, bookings, SMS,
   landing_pages, reports, email_templates. Do not plan work around them.

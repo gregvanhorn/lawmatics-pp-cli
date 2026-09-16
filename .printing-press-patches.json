@@ -1,7 +1,20 @@
 {
   "schema_version": 1,
-  "applied_at": "2026-05-21",
+  "applied_at": "2026-09-16",
   "base_run_id": "20260520-223821",
   "base_printing_press_version": "4.9.0",
-  "patches": []
+  "patches": [
+    {
+      "id": "contact-name-lookup",
+      "summary": "Correct the live contact name finder route and add local name matching with associated phones.",
+      "reason": "Lawmatics documents the name as a path parameter; the generated query binding and ID-based local fallback cannot implement this lookup. The route binding should be corrected upstream; the local contact/phone projection belongs here because it uses Lawmatics-specific fields and relationships.",
+      "files": ["internal/cli/contacts_find_by_name.go", "internal/cli/data_source.go", "internal/store/contact_lookup.go", "internal/store/contact_lookup_test.go", "internal/cli/contacts_find_by_name_test.go", "internal/mcp/tools.go", "README.md"]
+    },
+    {
+      "id": "orb-go-setup",
+      "summary": "Install the pinned Go toolchain, dependencies, and CLI in fresh orbs.",
+      "reason": "This repository's orb did not have Go or the CLI installed; persist the verified setup for future development.",
+      "files": [".agents/setup", ".gitignore"]
+    }
+  ]
 }

@@ -228,7 +228,7 @@ func RegisterTools(s *server.MCPServer) {
 			mcplib.WithDestructiveHintAnnotation(false),
 			mcplib.WithOpenWorldHintAnnotation(true),
 		),
-		makeAPIHandler("GET", "/contacts/find_by_name", false, []mcpParamBinding{{PublicName: "name", WireName: "name", Location: "query"}}, []string{}),
+		makeAPIHandler("GET", "/contacts/find_by_name/{name}", false, []mcpParamBinding{{PublicName: "name", WireName: "name", Location: "path"}}, []string{}),
 	)
 	s.AddTool(
 		mcplib.NewTool("contacts_find_by_phone",

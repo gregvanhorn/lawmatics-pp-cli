@@ -38,3 +38,6 @@ workflow-verify-report.json
 .idea/
 .vscode/
 *.swp
+
+# Orb portal registrations
+.amp/portals/*

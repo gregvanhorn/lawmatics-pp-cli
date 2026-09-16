@@ -284,6 +284,19 @@ func resolveLocal(ctx context.Context, resourceType string, isList bool, path st
 
 	prov := localProvenance(db, resourceType, reason)
 
+	if resourceType == "contacts" && strings.HasPrefix(path, "/contacts/find_by_name/") {
+		name, err := url.PathUnescape(strings.TrimPrefix(path, "/contacts/find_by_name/"))
+		if err != nil {
+			return nil, prov, err
+		}
+		matches, err := db.FindContactsByName(name)
+		if err != nil {
+			return nil, prov, err
+		}
+		data, err := json.Marshal(matches)
+		return data, prov, err
+	}
+
 	// Warn if endpoint had filters that local reads can't reproduce
 	if len(params) > 0 {
 		fmt.Fprintf(os.Stderr, "warning: local data is unfiltered — endpoint filters are not applied to cached data\n")

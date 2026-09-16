@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -17,22 +18,23 @@ func newContactsFindByNameCmd(flags *rootFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:         "find-by-name",
 		Short:       "Find a contact by name",
-		Example:     "  lawmatics-pp-cli contacts find-by-name --name example-resource",
-		Annotations: map[string]string{"pp:endpoint": "contacts.find_by_name", "pp:method": "GET", "pp:path": "/contacts/find_by_name", "mcp:read-only": "true"},
+		Long:        "Find a contact through the live API, or use --data-source local to return all synced contacts whose first, last, or full name contains the name (case-insensitive). Local results include cached phone numbers and sync timestamps; they may be incomplete until contacts and phone_numbers are synced with fields=all.",
+		Example:     "  lawmatics-pp-cli contacts find-by-name --name Gottfried --data-source local --json",
+		Annotations: map[string]string{"pp:endpoint": "contacts.find_by_name", "pp:method": "GET", "pp:path": "/contacts/find_by_name/{name}", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("name") && !flags.dryRun {
 				return fmt.Errorf("required flag \"%s\" not set", "name")
+			}
+			if cmd.Flags().Changed("name") && strings.TrimSpace(flagName) == "" {
+				return usageErr(fmt.Errorf("--name must not be blank"))
 			}
 			c, err := flags.newClient()
 			if err != nil {
 				return err
 			}
 
-			path := "/contacts/find_by_name"
+			path := replacePathParam("/contacts/find_by_name/{name}", "name", flagName)
 			params := map[string]string{}
-			if flagName != "" {
-				params["name"] = fmt.Sprintf("%v", flagName)
-			}
 			data, prov, err := resolveRead(cmd.Context(), c, flags, "contacts", false, path, params, nil)
 			if err != nil {
 				return classifyAPIError(err, flags)
@@ -56,7 +58,7 @@ func newContactsFindByNameCmd(flags *rootFlags) *cobra.Command {
 				filtered := data
 				if flags.selectFields != "" {
 					filtered = filterFields(filtered, flags.selectFields)
-				} else if flags.compact {
+				} else if flags.compact && prov.Source != "local" {
 					filtered = compactFields(filtered)
 				}
 				wrapped, wrapErr := wrapWithProvenance(filtered, prov)

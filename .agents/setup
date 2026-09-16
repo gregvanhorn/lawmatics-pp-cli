@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+version="$(awk '$1 == "go" { print $2 }' go.mod)"
+arch="$(uname -m)"
+case "$arch" in
+  x86_64) arch=amd64 ;;
+  aarch64) arch=arm64 ;;
+  *) echo "Unsupported Go architecture: $arch" >&2; exit 1 ;;
+esac
+toolchain="$HOME/.local/share/go-$version"
+mkdir -p "$HOME/.local/bin"
+if [[ ! -x "$toolchain/bin/go" ]]; then
+  archive="$(mktemp)"
+  trap 'rm -f "$archive"' EXIT
+  echo "Installing Go $version"
+  curl -fsSL "https://go.dev/dl/go${version}.linux-${arch}.tar.gz" -o "$archive"
+  checksum="$(curl -fsSL 'https://go.dev/dl/?mode=json&include=all' | jq -er --arg file "go${version}.linux-${arch}.tar.gz" '[.[].files[] | select(.filename == $file)][0].sha256')"
+  echo "$checksum  $archive" | sha256sum -c -
+  mkdir -p "$toolchain"
+  tar -xzf "$archive" --strip-components=1 -C "$toolchain"
+fi
+ln -sfn "$toolchain/bin/go" "$HOME/.local/bin/go"
+ln -sfn "$toolchain/bin/gofmt" "$HOME/.local/bin/gofmt"
+export PATH="$HOME/.local/bin:$PATH"
+echo "Downloading Go dependencies"
+go mod download
+echo "Installing CLI"
+GOBIN="$HOME/.local/bin" go install ./cmd/lawmatics-pp-cli

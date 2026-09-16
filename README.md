@@ -135,6 +135,39 @@ lawmatics-pp-cli cf report --fields "Case Value,Referral" --csv
 
 ```
 
+## Contact name lookup and phone matching
+
+The live finder uses Lawmatics' documented `GET /v1/contacts/find_by_name/:name`
+route. For surname lookup with **all cached candidates**, use local mode:
+
+```bash
+# Populate names, primary phones, and phone-owner relationships.
+lawmatics-pp-cli sync --resources contacts,phone_numbers --param fields=all --full --max-pages 0 --strict --agent
+lawmatics-pp-cli contacts find-by-name --name Gottfried --data-source local --agent
+```
+
+Local mode performs a case-insensitive substring match on first/last/full names,
+normalizing whitespace. It does not search notes or email addresses. It returns
+`results` as an array, including duplicate-name contacts, with `id`, `first_name`,
+`last_name`, `name`, `email`, `phone_numbers`, and `phone_numbers_synced_at`.
+`--agent` retains these fields; `--select` can project a smaller set.
+
+Phone numbers combine the contact's primary phone fields with synced phone records
+whose `informationable` relationship identifies that contact. Numbers retain their
+original formatting and exact duplicates are removed. Normalize numbers before
+matching RingCentral calls; do not assume a name identifies a unique person.
+
+`meta.synced_at` reports the contact sync time; `phone_numbers_synced_at` reports
+the separate phone sync time (`null` means unknown). Timestamps do not guarantee a
+complete sync—check the sync summary for warnings. Missing phone data does not
+prove a contact has no phone number. No match returns `results: []`; an unpopulated
+contact cache gives sync guidance. Refresh the cache before time-sensitive work.
+
+Without `--data-source local`, the existing auto mode tries the live API first and
+falls back only on network errors, not HTTP errors. Live matching and response
+shape are controlled by Lawmatics; they are not the local all-candidates search.
+The standalone MCP finder uses the corrected live route; local lookup is a CLI feature.
+
 ## Unique Features
 
 These capabilities aren't available in any other tool for this API.

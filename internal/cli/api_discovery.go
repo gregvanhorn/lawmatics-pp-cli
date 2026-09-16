@@ -11,6 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// isAPIInterface reports whether a root command belongs in the `api` index.
+// Generated resource groups are hidden from the main help and indexed by
+// that fact; a hand-maintained group that is also user-facing (forms) opts
+// in with the pp:interface annotation so an agent auditing `api` still sees
+// the complete endpoint surface.
+func isAPIInterface(cmd *cobra.Command) bool {
+	return cmd.Hidden || cmd.Annotations["pp:interface"] != ""
+}
+
 func newAPICmd(flags *rootFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:         "api [interface]",
@@ -35,7 +44,7 @@ Run 'api <interface>' to see that interface's methods.`,
 			if len(args) > 0 {
 				target := strings.ToLower(args[0])
 				for _, child := range root.Commands() {
-					if child.Hidden && strings.ToLower(child.Name()) == target {
+					if isAPIInterface(child) && strings.ToLower(child.Name()) == target {
 						methods := child.Commands()
 						// JSON envelope: {interface, short, methods: [{name, short}, ...]}.
 						if flags.asJSON {
@@ -75,7 +84,7 @@ Run 'api <interface>' to see that interface's methods.`,
 			}
 			var ifaces []ifaceEntry
 			for _, child := range root.Commands() {
-				if child.Hidden {
+				if isAPIInterface(child) {
 					ifaces = append(ifaces, ifaceEntry{Name: child.Name(), Short: child.Short})
 				}
 			}

@@ -11,6 +11,39 @@
       "files": ["internal/cli/contacts_find_by_name.go", "internal/cli/data_source.go", "internal/store/contact_lookup.go", "internal/store/contact_lookup_test.go", "internal/cli/contacts_find_by_name_test.go", "internal/mcp/tools.go", "README.md"]
     },
     {
+      "id": "custom-forms",
+      "summary": "Add a first-class `forms` command group (list/get/fields/entries/submit) for the /v1/forms resource the generator omitted.",
+      "reason": "Custom Forms are live on the API but absent from the generated interface list, and filling one out needs behavior no endpoint mirror provides: fields=all expansion, row flattening, name resolution, and submit-body assembly.",
+      "files": [
+        "internal/cli/forms.go",
+        "internal/cli/forms_api.go",
+        "internal/cli/forms_schema.go",
+        "internal/cli/forms_resolve.go",
+        "internal/cli/forms_list.go",
+        "internal/cli/forms_get.go",
+        "internal/cli/forms_fields.go",
+        "internal/cli/forms_entries.go",
+        "internal/cli/forms_submit.go",
+        "internal/cli/root.go",
+        "internal/cli/which.go",
+        "README.md",
+        "SKILL.md"
+      ],
+      "validated_outcome": "Form 450 (797 rows) flattens to its fillable components in form order, deduplicated; `forms submit --json-file` posts a body keyed by component id."
+    },
+    {
+      "id": "api-index-visible-interfaces",
+      "summary": "Let a visible command group opt into the `api` index with a pp:interface annotation.",
+      "reason": "The index equated 'interface' with 'hidden', which would have omitted the forms group from the endpoint surface an agent audits with `api`.",
+      "files": ["internal/cli/api_discovery.go"]
+    },
+    {
+      "id": "client-raw-post",
+      "summary": "Split the request path so a caller can POST a pre-encoded body with its own Content-Type.",
+      "reason": "Form submissions with file attachments must be multipart/form-data, which the JSON-only client could not express; the dry-run preview now also renders non-JSON bodies.",
+      "files": ["internal/client/client.go"]
+    },
+    {
       "id": "orb-go-setup",
       "summary": "Install the pinned Go toolchain, dependencies, and CLI in fresh orbs.",
       "reason": "This repository's orb did not have Go or the CLI installed; persist the verified setup for future development.",

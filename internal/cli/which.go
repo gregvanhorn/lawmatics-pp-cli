@@ -42,6 +42,9 @@ var whichIndex = []whichEntry{
 	{Command: "watch", Description: "Local daemon that polls and POSTs entity diffs to a URL of your choice.", Group: "Agent-native plumbing", WhyItMatters: "Use when integrating Lawmatics with internal automation without paying for native webhooks."},
 	{Command: "explain", Description: "Markdown brief summarizing a matter from notes, interactions, and tasks.", Group: "Local state that compounds", WhyItMatters: "Use before a status call to brief in 5 seconds."},
 	{Command: "pipeline drift", Description: "Matters that skipped a stage or moved backward through the pipeline.", Group: "Local state that compounds", WhyItMatters: "Use to find broken intake processes before clients notice."},
+	{Command: "forms fields", Description: "Flatten a custom form into its fillable field ids, labels, types, and required flags.", Group: "Custom forms", WhyItMatters: "The only way to learn a form's submit keys; the API returns name and timestamps unless fields=all is sent."},
+	{Command: "forms submit", Description: "Create a custom form entry from a JSON body or repeated field assignments.", Group: "Custom forms", WhyItMatters: "Fill an intake form end to end from a script; submitting fires the form's automations."},
+	{Command: "forms list", Description: "List every custom form on the account with its uuid and name.", Group: "Custom forms", WhyItMatters: "Resolve a form number like 0450 to the uuid every other forms command takes."},
 }
 
 // whichMatch pairs an index entry with its ranking score for a query.

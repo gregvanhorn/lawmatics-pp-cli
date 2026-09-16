@@ -168,6 +168,102 @@ falls back only on network errors, not HTTP errors. Live matching and response
 shape are controlled by Lawmatics; they are not the local all-candidates search.
 The standalone MCP finder uses the corrected live route; local lookup is a CLI feature.
 
+## Custom forms
+
+Lawmatics serves custom forms at `/v1/forms`. The `forms` command group covers
+the whole lifecycle an agent can drive over the API: find the form, read its
+fillable fields, fill it in, and read back the entries.
+
+```bash
+# Find the form. --filter matches locally, because the live list endpoint
+# ignores filter parameters.
+lawmatics-pp-cli forms list --all --filter 0450 --agent
+
+# List the fillable fields. The id column is the submit key.
+lawmatics-pp-cli forms fields "0450" --agent
+lawmatics-pp-cli forms fields "0450" --required-only
+lawmatics-pp-cli forms fields "0450" --filter spouse
+
+# Write a submit-ready body, fill it in, and send it.
+lawmatics-pp-cli forms fields "0450" --template > filled.json
+$EDITOR filled.json
+lawmatics-pp-cli forms submit "0450" --json-file filled.json --agent
+
+# Or set values inline.
+lawmatics-pp-cli forms submit "0450" \
+  --field "$FIRST_NAME_ID=Ada" \
+  --string "$ZIPCODE_ID=02134" \
+  --agent
+
+# Read back what has been submitted.
+lawmatics-pp-cli forms entries "0450" --all --agent
+```
+
+**Naming a form.** Every `forms` subcommand accepts a uuid, the exact name, a
+form number (`450`, `0450`, `Form 450`), or an unambiguous part of the name
+(`EP Consult + Design Decisions`). A uuid is used as-is; anything else is
+resolved against the account's form list. A reference that matches more than
+one form fails with exit code 2 and lists the candidates rather than guessing.
+
+**`fields=all` is mandatory.** Without it the API returns only a form's name
+and timestamps — no `rows`, no components. `forms get` sends `fields=all` by
+default (`--fields rows` for the layout alone, `--fields ""` for bare
+metadata) and `forms fields` always sends it.
+
+**What `forms fields` returns.** Rows are flattened depth-first in form order,
+layout components (page dividers, instruction blocks) are dropped unless
+`--all-components` is passed, and a component repeated across conditional rows
+is reported once. NWO's Form 450 (`0450 - EP Consult + Design Decisions`,
+`38d8ec11-87cd-41d6-b983-f025cfec8926`) flattens ~797 rows into ~612 fillable
+fields. Note that `--agent` implies `--compact`, which drops sparsely
+populated columns such as `simplified_id` and `list_options`; use `--json`, or
+`--select id,label,field_type,required,simplified_id,options`, for the full
+projection.
+
+**Submitting.** Values are keyed by field id. `--field` decodes its value as
+JSON when it parses as JSON (`true`, `12`, `["a","b"]`) and keeps it as text
+otherwise — a leading zero is not a valid JSON number, so `02134` survives as
+text. `--string` never decodes. `--file id=path` attaches a file and switches
+the request to `multipart/form-data`; `--multipart` forces multipart without
+an attachment. Before sending, the submission is checked against the form
+definition and unknown ids or missing required fields are rejected locally;
+`--no-validate` skips the check. Lawmatics documents the submit endpoint as
+unauthenticated, but a configured token is still sent by default because the
+same credential governs rate limits and attribution — pass `--no-auth` to
+submit anonymously. **Submitting fires the form's automations**; use
+`--dry-run` to preview the request first.
+
+**Not supported: creating forms.** `POST /v1/forms` returns 404 on this
+account — form definitions are authored only in the Lawmatics UI (Assets →
+Custom Forms). There is deliberately no `forms create`, `forms update`, or
+`forms delete`.
+
+Forms are read live and are not part of `sync`, so `--data-source local` is
+refused rather than silently returning nothing.
+
+## API coverage gaps
+
+Findings from a 2026-09-16 audit of the live API against this CLI, kept here
+so the next reader does not re-derive them:
+
+| Resource | Status |
+| --- | --- |
+| `/v1/forms` | Live. Covered by the `forms` command group added for this reason. |
+| `/v1/campaigns` | Live. Covered by `campaigns list` / `campaigns get`. |
+| `/v1/sources` | Live. Covered by `sources list` / `sources get`. |
+| `/v1/collections`, `/v1/collection_items` | Documented by Lawmatics; **not covered** by this CLI. |
+| `POST /v1/forms` | Returns 404 — form definitions are UI-only. |
+| documents, document_templates, signatures, automations, webhooks, bookings, SMS, landing_pages, reports, email_templates | 404 on the audited account; no public REST surface to mirror. |
+
+Known behaviour gaps in the resources this CLI already covers:
+
+- List filters are frequently ignored by the API: a filtered request returns
+  an unfiltered page. Filter locally (as `forms list --filter` does) or verify
+  the response before trusting a filtered count.
+- `sync` historically followed only the first page for contacts; pass
+  `--max-pages 0` and check the sync summary for warnings.
+- Form schemas require `fields=all`; see above.
+
 ## Unique Features
 
 These capabilities aren't available in any other tool for this API.
@@ -299,6 +395,13 @@ Operations on addresses
 - **`lawmatics-pp-cli addresses list`** - List addresses
 - **`lawmatics-pp-cli addresses update`** - Update an address
 
+### campaigns
+
+Operations on campaigns
+
+- **`lawmatics-pp-cli campaigns get`** - Get a campaign
+- **`lawmatics-pp-cli campaigns list`** - List campaigns
+
 ### comments
 
 Operations on comments
@@ -423,6 +526,16 @@ Operations on folders
 - **`lawmatics-pp-cli folders list`** - List folders
 - **`lawmatics-pp-cli folders update`** - Update a folder
 
+### forms
+
+Discover and fill out Lawmatics custom forms
+
+- **`lawmatics-pp-cli forms entries`** - List submissions recorded for a custom form
+- **`lawmatics-pp-cli forms fields`** - List the fillable fields of a custom form
+- **`lawmatics-pp-cli forms get`** - Get a custom form definition
+- **`lawmatics-pp-cli forms list`** - List custom forms
+- **`lawmatics-pp-cli forms submit`** - Submit an entry to a custom form
+
 ### interactions
 
 Operations on interactions
@@ -530,6 +643,13 @@ Operations on relationships
 - **`lawmatics-pp-cli relationships get`** - Get a relationship
 - **`lawmatics-pp-cli relationships list`** - List relationships
 - **`lawmatics-pp-cli relationships update`** - Update a relationship
+
+### sources
+
+Operations on sources
+
+- **`lawmatics-pp-cli sources get`** - Get a source
+- **`lawmatics-pp-cli sources list`** - List sources
 
 ### stages
 

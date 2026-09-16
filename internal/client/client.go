@@ -201,6 +201,14 @@ func (c *Client) Post(path string, body any) (json.RawMessage, int, error) {
 	return c.do("POST", path, nil, body, nil)
 }
 
+// PostRaw issues a POST with a caller-prepared body and Content-Type. Use it
+// for payloads JSON marshalling cannot express (multipart/form-data form
+// submissions). The body is sent verbatim; every other behaviour — auth,
+// retries, adaptive rate limiting, dry-run preview — matches Post.
+func (c *Client) PostRaw(path string, params map[string]string, body []byte, contentType string, headers map[string]string) (json.RawMessage, int, error) {
+	return c.doRaw("POST", path, params, body, contentType, headers)
+}
+
 func (c *Client) PostWithParams(path string, params map[string]string, body any) (json.RawMessage, int, error) {
 	return c.do("POST", path, params, body, nil)
 }
@@ -264,15 +272,27 @@ func (c *Client) PatchWithParamsAndHeaders(path string, params map[string]string
 // do executes an HTTP request. headerOverrides, when non-nil, override global
 // RequiredHeaders for this specific request (used for per-endpoint API versioning).
 func (c *Client) do(method, path string, params map[string]string, body any, headerOverrides map[string]string) (json.RawMessage, int, error) {
-	targetURL := c.BaseURL + path
-
 	var bodyBytes []byte
+	contentType := ""
 	if body != nil {
 		b, err := json.Marshal(body)
 		if err != nil {
 			return nil, 0, fmt.Errorf("marshaling body: %w", err)
 		}
 		bodyBytes = b
+		contentType = "application/json"
+	}
+	return c.doRaw(method, path, params, bodyBytes, contentType, headerOverrides)
+}
+
+// doRaw executes an HTTP request with an already-encoded body.
+// headerOverrides, when non-nil, override global RequiredHeaders for this
+// specific request (used for per-endpoint API versioning).
+func (c *Client) doRaw(method, path string, params map[string]string, bodyBytes []byte, contentType string, headerOverrides map[string]string) (json.RawMessage, int, error) {
+	targetURL := c.BaseURL + path
+
+	if bodyBytes != nil && contentType == "" {
+		contentType = "application/json"
 	}
 
 	// Resolve auth material before the dry-run branch so --dry-run can preview
@@ -286,7 +306,7 @@ func (c *Client) do(method, path string, params map[string]string, body any, hea
 
 	// Build the request for dry-run display or actual execution
 	if c.DryRun {
-		return c.dryRun(method, targetURL, path, params, bodyBytes, headerOverrides, authHeader)
+		return c.dryRun(method, targetURL, path, params, bodyBytes, contentType, headerOverrides, authHeader)
 	}
 
 	const maxRetries = 3
@@ -305,7 +325,7 @@ func (c *Client) do(method, path string, params map[string]string, body any, hea
 			return nil, 0, fmt.Errorf("creating request: %w", err)
 		}
 		if bodyBytes != nil {
-			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Content-Type", contentType)
 		}
 
 		if params != nil {
@@ -416,7 +436,7 @@ func (c *Client) do(method, path string, params map[string]string, body any, hea
 // dryRun prints the outgoing request exactly as the live path would send it,
 // using the auth material already resolved in `do()`. Never triggers a network
 // call — the caller is responsible for passing cached auth material only.
-func (c *Client) dryRun(method, targetURL, path string, params map[string]string, body []byte, headerOverrides map[string]string, authHeader string) (json.RawMessage, int, error) {
+func (c *Client) dryRun(method, targetURL, path string, params map[string]string, body []byte, contentType string, headerOverrides map[string]string, authHeader string) (json.RawMessage, int, error) {
 	fmt.Fprintf(os.Stderr, "%s %s\n", method, targetURL)
 	queryPrinted := false
 	if params != nil {
@@ -438,12 +458,19 @@ func (c *Client) dryRun(method, targetURL, path string, params map[string]string
 	}
 	_ = queryPrinted
 	if body != nil {
+		if contentType != "" {
+			fmt.Fprintf(os.Stderr, "  Content-Type: %s\n", contentType)
+		}
 		var pretty json.RawMessage
 		if json.Unmarshal(body, &pretty) == nil {
 			enc := json.NewEncoder(os.Stderr)
 			enc.SetIndent("  ", "  ")
 			fmt.Fprintf(os.Stderr, "  Body:\n")
 			enc.Encode(pretty)
+		} else {
+			// Non-JSON bodies (multipart form submissions) still need a
+			// preview; without this branch --dry-run showed an empty request.
+			fmt.Fprintf(os.Stderr, "  Body (%d bytes):\n%s\n", len(body), truncateBody(body))
 		}
 	}
 	if authHeader != "" {
